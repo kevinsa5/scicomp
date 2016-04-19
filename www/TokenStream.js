@@ -45,22 +45,25 @@ class TokenStream {
                 return new Token("float", parseFloat(s));
             }
         }
+	char = this.charstream.next();
         if(TokenStream.isPunctuation(char)){
-	    this.charstream.next();
             return new Token("punctuation", char);
         }
         if(TokenStream.isValidSymbolBeginner(char)){
-            var s = this.readUntil(function(char){return !TokenStream.isValidSymbolCharacter(char);});
-            if(TokenStream.isReservedWord(s)) return new Token("reserved", s);
+            var s = char + this.readUntil(function(char){return !TokenStream.isValidSymbolCharacter(char);});
+            if(TokenStream.isReservedWord(s)){
+		if(s == "true" || s == "false")
+		    return new Token("boolean", s);
+		return new Token("reserved", s);
+	    }
             return new Token("symbol", s);
         }
-        if(TokenStream.isSingleCharOperator(char)){
-            this.charstream.next();
-            return new Token("op", char);
-        }
         if(TokenStream.isDoubleCharOperator(char,0) && TokenStream.isDoubleCharOperator(this.charstream.peek(),1)){
-            var s = this.charstream.next() + this.charstream.next();
-            return new Token("op", s);
+            var s = char + this.charstream.next();
+            return new Token("operator", s);
+        }
+        if(TokenStream.isSingleCharOperator(char)){
+            return new Token("operator", char);
         }
         this.die("Unknown token: `" + char + "`");
     }
@@ -91,13 +94,13 @@ class TokenStream {
         return /[a-zA-Z0-9]/i.test(char);
     }
     static isReservedWord(word){
-        return ["if", "in", "for", "while", "true", "false", "function", "return"].indexOf(word) != -1;
+        return ["if", "then", "else", "in", "for", "while", "true", "false", "function", "lambda", "return"].indexOf(word) != -1;
     }
     static isSingleCharOperator(char){
         return "!%^*+-<>=:".indexOf(char) != -1;
     }
     static isDoubleCharOperator(char,pos){
-        var ops = ["||", "&&", "==", "!="];
+        var ops = ["||", "&&", "==", "!=", "<=", ">="];
         for(var i = 0; i < ops.length; i++){
             if(ops[i].charAt(pos) == char) return true;
         }
