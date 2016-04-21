@@ -66,6 +66,9 @@ class AST {
     
     skipToken(token){
         var other = this.tokenstream.peek();
+        if(other == null){
+            this.die("Expected token of type `" + token.type + "` with value `" + token.value + "`.");
+        }
         if(other.type == token.type && other.value == token.value){
             this.tokenstream.next();
         } else {
@@ -111,11 +114,12 @@ class AST {
         };
     }
     parseIndexing(expr) {
-        return {
+        var exp = {
             type: "indexing",
             vector: expr,
             indices: this.delimited("[", "]", ",", (this.parseExpression).bind(this))
         };
+        return this.maybeIndex(exp);
     }
     parseFunctionEval(func) {
         return {

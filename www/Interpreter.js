@@ -3,6 +3,7 @@ class Interpreter {
         this.ast = ast;
         this.out = out;
         this.global = new Scope(null);
+        this.native = new Builtins(this);
     }
     run(){
         while(!this.ast.empty()){
@@ -25,7 +26,7 @@ class Interpreter {
     evalExpression(exp, scope){
 	if(scope == undefined){
 		console.log("YOU FUCKED UP");
-		alert("ya fucked up bra");
+		alert("ya fucked up brah");
 	}
         if(exp.type == "assign"){
             if(exp.left.type == "indexing"){
@@ -46,11 +47,16 @@ class Interpreter {
             this.die("Invalid assignment target: " + name);
         }
         if(exp.type == "indexing"){
+            if(exp.vector.type == "indexing"){
+                exp.vector = this.evalExpression(exp.vector, scope);
+                return this.evalExpression(exp, scope);
+            }
             if(exp.vector.type == "vector"){
                 var vec = [];
                 for(var i = 0; i < exp.indices.length; i++){
                     var j = this.evalExpression(exp.indices[i],scope);
-                    vec.push(exp.vector.value[j.value]);
+                    var k = this.evalExpression(exp.vector.value[j.value], scope);
+                    vec.push(k);
                 }
                 if(vec.length > 1)
                     return {type: "vector", value: vec, length: vec.length};
@@ -63,7 +69,7 @@ class Interpreter {
                 var expr = {type: "indexing", vector: vec, indices: exp.indices};
                 return this.evalExpression(expr, scope);
             }
-            this.die("Unknown form of indexing: " + exp);
+            this.die("Unknown form of indexing: " + exp.vector.type);
         }
         if(exp.type == "symbol"){
             return scope.find(exp);
@@ -73,38 +79,10 @@ class Interpreter {
         }
         if(exp.type == "funceval"){
             if(exp.func.value == "println"){
-                for(var i = 0; i < exp.args.length; i++){
-                    var result = this.evalExpression(exp.args[i], scope);
-                    if(result.type == "vector"){
-                        this.out.print("[");
-                        for(var j = 0; j < result.length-1; j++){
-                            this.out.print(result.value[j].value);
-                            this.out.print(", ");
-                        }
-                        this.out.print(result.value[j].value);
-                        this.out.println("]");
-                    } else {
-                        this.out.println(result.value);
-                    }
-                }
-		return null;
+                return this.native.println(exp,scope);
             }
             if(exp.func.value == "print"){
-                for(var i = 0; i < exp.args.length; i++){
-                    var result = this.evalExpression(exp.args[i], scope);
-                    if(result.type == "vector"){
-                        this.out.print("[");
-                        for(var j = 0; j < result.length-1; j++){
-                            this.out.print(result.value[j].value);
-                            this.out.print(", ");
-                        }
-                        this.out.print(result.value[j].value);
-                        this.out.print("]");
-                    } else {
-                        this.out.print(result.value);
-                    }
-                }
-                return null;
+                return this.native.print(exp, scope);
             }
             var func = scope.find(exp.func);
             if(func.type != "lambda"){
