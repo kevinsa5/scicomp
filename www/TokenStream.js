@@ -31,7 +31,7 @@ class TokenStream {
             this.charstream.next();
             return new Token("string", s);
         }
-        if(char == "#" || char == "/" && this.charstream.peek() == "/"){
+        if(char == "#"){
             this.readUntil(function(char){return char == "\n"});
             this.charstream.next();
             return this.getNext();
@@ -58,7 +58,7 @@ class TokenStream {
 	    }
             return new Token("symbol", s);
         }
-        if(TokenStream.isDoubleCharOperator(char,0) && TokenStream.isDoubleCharOperator(this.charstream.peek(),1)){
+        if(TokenStream.isDoubleCharOperator(char+this.charstream.peek())){
             var s = char + this.charstream.next();
             return new Token("operator", s);
         }
@@ -97,12 +97,12 @@ class TokenStream {
         return ["if", "then", "else", "in", "for", "while", "true", "false", "function", "lambda", "return"].indexOf(word) != -1;
     }
     static isSingleCharOperator(char){
-        return "!%^*+-<>=:".indexOf(char) != -1;
+        return "!%^*/+-<>=:".indexOf(char) != -1;
     }
-    static isDoubleCharOperator(char,pos){
+    static isDoubleCharOperator(op){
         var ops = ["||", "&&", "==", "!=", "<=", ">="];
         for(var i = 0; i < ops.length; i++){
-            if(ops[i].charAt(pos) == char) return true;
+            if(ops[i] == op) return true;
         }
         return false;
     }
