@@ -28,13 +28,42 @@ class Interpreter {
 		alert("ya fucked up bra");
 	}
         if(exp.type == "assign"){
-            if(exp.left.type != "symbol"){
-                var name = exp.left.value;
-                this.die("Invalid assignment target: " + name);
+            if(exp.left.type == "indexing"){
+                var vec = this.evalExpression(exp.left.vector,scope);
+                var right = this.evalExpression(exp.right, scope);
+                for(var i = 0; i < exp.left.indices.length; i++){
+                    var j = this.evalExpression(exp.left.indices[i],scope);
+                    vec.value[j.value] = right;
+                }
+                return vec;
             }
-            var right = this.evalExpression(exp.right,scope);
-            scope.addSymbol(exp.left,  right);
-            return right;
+            if(exp.left.type == "symbol"){
+                var right = this.evalExpression(exp.right,scope);
+                scope.addSymbol(exp.left,  right);
+                return right;
+            }
+            var name = exp.left.value;
+            this.die("Invalid assignment target: " + name);
+        }
+        if(exp.type == "indexing"){
+            if(exp.vector.type == "vector"){
+                var vec = [];
+                for(var i = 0; i < exp.indices.length; i++){
+                    var j = this.evalExpression(exp.indices[i],scope);
+                    vec.push(exp.vector.value[j.value]);
+                }
+                if(vec.length > 1)
+                    return {type: "vector", value: vec, length: vec.length};
+                if(vec.length == 1) 
+                    return vec[0];
+                return null;
+            }
+            if(exp.vector.type == "symbol"){
+                var vec = scope.find(exp.vector);
+                var expr = {type: "indexing", vector: vec, indices: exp.indices};
+                return this.evalExpression(expr, scope);
+            }
+            this.die("Unknown form of indexing: " + exp);
         }
         if(exp.type == "symbol"){
             return scope.find(exp);
@@ -46,14 +75,34 @@ class Interpreter {
             if(exp.func.value == "println"){
                 for(var i = 0; i < exp.args.length; i++){
                     var result = this.evalExpression(exp.args[i], scope);
-                    this.out.println(result.value);
+                    if(result.type == "vector"){
+                        this.out.print("[");
+                        for(var j = 0; j < result.length-1; j++){
+                            this.out.print(result.value[j].value);
+                            this.out.print(", ");
+                        }
+                        this.out.print(result.value[j].value);
+                        this.out.println("]");
+                    } else {
+                        this.out.println(result.value);
+                    }
                 }
 		return null;
             }
             if(exp.func.value == "print"){
                 for(var i = 0; i < exp.args.length; i++){
                     var result = this.evalExpression(exp.args[i], scope);
-                    this.out.print(result.value);
+                    if(result.type == "vector"){
+                        this.out.print("[");
+                        for(var j = 0; j < result.length-1; j++){
+                            this.out.print(result.value[j].value);
+                            this.out.print(", ");
+                        }
+                        this.out.print(result.value[j].value);
+                        this.out.print("]");
+                    } else {
+                        this.out.print(result.value);
+                    }
                 }
                 return null;
             }
@@ -84,6 +133,13 @@ class Interpreter {
             if(exp.hasOwnProperty("else")){
                 return this.evalBlock(exp.else,scope);
             }
+            return null;
+        }
+        if(exp.type == "for"){
+            if(exp.iter.type != "binary"){
+                this.die("Improper iteration syntax");
+            }
+            //TODO
             return null;
         }
         if(exp.type == "binary"){
@@ -152,7 +208,7 @@ class Interpreter {
         this.die("Unknown expression: " + JSON.stringify(exp));
     }
     isAtom(exp){
-        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean";
+        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector";
     }
     rethrowError(e){
         this.out.println(e);

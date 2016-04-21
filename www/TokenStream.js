@@ -49,6 +49,13 @@ class TokenStream {
         if(TokenStream.isPunctuation(char)){
             return new Token("punctuation", char);
         }
+        if(TokenStream.isDoubleCharOperator(char+this.charstream.peek())){
+            var s = char + this.charstream.next();
+            return new Token("operator", s);
+        }
+        if(TokenStream.isSingleCharOperator(char)){
+            return new Token("operator", char);
+        }
         if(TokenStream.isValidSymbolBeginner(char)){
             var s = char + this.readUntil(function(char){return !TokenStream.isValidSymbolCharacter(char);});
             if(TokenStream.isReservedWord(s)){
@@ -57,13 +64,6 @@ class TokenStream {
 		return new Token("reserved", s);
 	    }
             return new Token("symbol", s);
-        }
-        if(TokenStream.isDoubleCharOperator(char+this.charstream.peek())){
-            var s = char + this.charstream.next();
-            return new Token("operator", s);
-        }
-        if(TokenStream.isSingleCharOperator(char)){
-            return new Token("operator", char);
         }
         this.die("Unknown token: `" + char + "`");
     }
@@ -94,13 +94,13 @@ class TokenStream {
         return /[a-zA-Z0-9]/i.test(char);
     }
     static isReservedWord(word){
-        return ["if", "then", "else", "in", "for", "while", "true", "false", "function", "lambda", "return"].indexOf(word) != -1;
+        return ["if", "then", "else", "for", "while", "true", "false", "function", "lambda", "return"].indexOf(word) != -1;
     }
     static isSingleCharOperator(char){
         return "!%^*/+-<>=:".indexOf(char) != -1;
     }
     static isDoubleCharOperator(op){
-        var ops = ["||", "&&", "==", "!=", "<=", ">="];
+        var ops = ["||", "&&", "==", "!=", "<=", ">=", "in"];
         for(var i = 0; i < ops.length; i++){
             if(ops[i] == op) return true;
         }

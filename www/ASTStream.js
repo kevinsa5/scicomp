@@ -9,6 +9,8 @@ class AST {
             "+": 10, "-": 10,
             "*": 20, "/": 20, "%": 20,
             "^": 30,
+            "in": 40,
+            ":": 50,
         };
     }
     
@@ -67,7 +69,7 @@ class AST {
         if(other.type == token.type && other.value == token.value){
             this.tokenstream.next();
         } else {
-            this.die("Expected token of type " + token.type + " with value " + token.value + ".  Found token of type " + other.type + " with value " + other.value);
+            this.die("Expected token of type `" + token.type + "` with value `" + token.value + "`.  Found token of type `" + other.type + "` with value `" + other.value + "`.");
         }
     }
     
@@ -82,7 +84,7 @@ class AST {
                     type     : tok.value == "=" ? "assign" : "binary",
                     operator : tok.value,
                     left     : left,
-                    right    : this.maybeBinary(this.parseAtom(), his_prec)
+                    right    : this.maybeBinary(this.maybeIndex(this.parseAtom()), his_prec)
                 }, my_prec);
             }
         }
@@ -99,6 +101,21 @@ class AST {
         }
         this.skipPunctuation(stop);
         return a;
+    }
+    parseVectorLiteral(){
+        var vals = this.delimited("[","]",",", (this.parseExpression).bind(this));
+        return {
+            type: "vector",
+            value: vals,
+            length: vals.length,
+        };
+    }
+    parseIndexing(expr) {
+        return {
+            type: "indexing",
+            vector: expr,
+            indices: this.delimited("[", "]", ",", (this.parseExpression).bind(this))
+        };
     }
     parseFunctionEval(func) {
         return {
@@ -128,6 +145,17 @@ class AST {
         }
         return ret;
     }
+    parseFor() {
+        this.skipReserved("for");
+        var iterinfo = this.parseExpression();
+        var body = this.parseExpression();
+        var ret = {
+            type: "for",
+            iter: iterinfo,
+            body: body,
+        };
+        return ret;        
+    }
     parseLambda() {
         return {
             type: "lambda",
@@ -145,6 +173,9 @@ class AST {
         expr = expr();
         return this.isPunctuation("(") ? this.parseFunctionEval(expr) : expr;
     }
+    maybeIndex(expr) {
+        return this.isPunctuation("[") ? this.parseIndexing(expr): expr;
+    }
     parseAtom() {
 	var ast = this;
         return this.maybeCall(function(){
@@ -155,7 +186,9 @@ class AST {
                 return exp;
             }
             if (ast.isPunctuation("{")) return ast.parseBody();
+            if (ast.isPunctuation("[")) return ast.parseVectorLiteral();
             if (ast.isReserved("if")) return ast.parseIf();
+            if (ast.isReserved("for")) return ast.parseFor();
             if (ast.isReserved("true") || ast.isReserved("false")) return ast.parseBool();
             if (ast.isReserved("lambda")) {
                 ast.tokenstream.next();
@@ -173,13 +206,12 @@ class AST {
     parseBody() {
         var body = this.delimited("{", "}", ";", (this.parseExpression).bind(this));
         if (body.length == 0) return null;
-        if (body.length == 1) return body;
         return body;
     }
     parseExpression() {
         var ast = this;
         return ast.maybeCall((function(){
-            return ast.maybeBinary(ast.parseAtom(), 0);
+            return ast.maybeBinary(ast.maybeIndex(ast.parseAtom()), 0);
         }).bind(this));
     }
     die(msg){
