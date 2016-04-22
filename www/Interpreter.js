@@ -114,11 +114,19 @@ class Interpreter {
             return null;
         }
         if(exp.type == "for"){
-            if(exp.iter.type != "binary"){
+            if(exp.iter.type != "binary" || exp.iter.operator != "in"){
                 this.die("Improper iteration syntax");
             }
-            //TODO
-            return null;
+            var vec = this.evalExpression(exp.iter.right,scope);
+            if(vec.type != "vector"){
+                this.die("Object not iterable: " + exp.iter.right.value);
+            }
+            var res = null;
+            for(var i = 0; i < vec.length; i++){
+                scope.addSymbol(exp.iter.left, vec.value[i]);
+                res = this.evalBlock(exp.body, scope);
+            }
+            return res;
         }
         if(exp.type == "binary"){
             if(exp.operator == "||"){
@@ -130,6 +138,68 @@ class Interpreter {
                 var a = this.evalExpression(exp.left,scope);
                 if(a.value == "false") return a;
                 return this.evalExpression(exp.right,scope);
+            }
+            if(exp.operator == ":"){
+                var left = "unknown";
+                var right = "unknown";
+                if(exp.right.type == "int" || exp.right.type == "float"){
+                    right = "num";
+                }
+                if(exp.left.type == "int" || exp.left.type == "float"){
+                    left = "num";
+                }
+                if(exp.left.type == "binary" && exp.left.operator == ":"){
+                    left = "colon";
+                }
+                if(left == "unknown"){
+                    this.die("Invalid left argument to colon operator");
+                }
+                if(right == "unknown"){
+                    this.die("Invalid right argument to colon operator");
+                }
+                // has the form left:step:right ?
+                if(left == "colon"){
+                    left = "unknown";
+                    var step = "unknown";
+                    if(exp.left.left.type == "int" || exp.left.left.type == "float"){
+                        left = "num";
+                    }
+                    if(exp.left.right.type == "int" || exp.left.right.type == "float"){
+                        step = "num";
+                    }
+                    if(left == "unknown"){
+                        this.die("Invalid left argument to colon operator");
+                    }
+                    if(step == "unknown"){
+                        this.die("Invalid step argument to colon operator");
+                    }
+                    left = this.evalExpression(exp.left.left, scope);
+                    step = this.evalExpression(exp.left.right, scope);
+                    if(step.value == 0){
+                        this.die("Step size must be nonzero");
+                    }
+                    right = this.evalExpression(exp.right, scope);
+                    var vec = [];
+                    var iter = left.value;
+                    var type = (left.type == "int" && step.type == "int") ? "int" : "float";
+                    while((step.value > 0 && iter <= right.value) ||
+                          (step.value < 0 && iter >= right.value)){
+                        vec.push({type:type, value:iter});
+                        iter = iter + step.value;
+                    }
+                    return {type:"vector", value:vec, length:vec.length};
+                }
+                //has the form left:right
+                left = this.evalExpression(exp.left, scope);
+                right = this.evalExpression(exp.right, scope);
+                var vec = [];
+                var iter = left.value;
+                var type = left.type;
+                while(iter <= right.value){
+                    vec.push({type:type,value:iter});
+                    iter = iter + 1;
+                }
+                return {type:"vector", value:vec, length:vec.length};
             }
             var a = this.evalExpression(exp.left,scope);
             var b = this.evalExpression(exp.right,scope);
