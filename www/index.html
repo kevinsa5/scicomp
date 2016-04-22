@@ -82,23 +82,29 @@ interp.run();
 <body>
 <p>Note: this may not work in Firefox &lt;45 and chromium/chrome &lt;49. </p>
 <textarea id="code" cols="80" rows="20" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'    '+v.substring(e);this.selectionStart=this.selectionEnd=s+4;return false;}">
-println("sup d00ds");
+line = lambda(){
+	for(i in 1:50){print("~");};
+	println("");
+};
 
+# function definition, if/else
 myfunc = lambda(a, b){
-  if a &lt;= b then {
+  if(a &lt;= b){
     println(a);
   };
-  println("moss");         # critical for program functionality
   b = 6;
-  if(b &gt; 5){println("butts");} else {println("toads");};
+  if(b &gt; 5){println("more");} else {println("less");};
 };
 
 myfunc(1,2);
+line();
 
 # these two lines are different!
 println(2*3+4);
 println(2*(3+4));
+line();
 
+# recursion, value of last evaluated expression is implicit return value
 fib = lambda(n) {
         if(n &lt; 2){
                 result = 1;
@@ -107,9 +113,26 @@ fib = lambda(n) {
         };
 };
 
-print("the 11th fibonnaci number is ", fib(11));
-println("");
+# for loop, colon notation
+for(i in 5:2:15){
+        print("the ", i, "th fibonacci number is ", fib(i));
+        println("");
+};
+line();
 
+# while loop (Collatz Conjecture)
+n = 6;
+while(n != 1){
+	println(n);
+	if(n % 2 == 0){
+		n = n/2;
+	} else {
+		n = 3*n+1;
+	};
+};
+line();
+
+# scoping
 thisvar = 0;
 if(thisvar &gt; 5){
         anon = lambda(a,b) {a*b;};
@@ -117,6 +140,24 @@ if(thisvar &gt; 5){
         anon = lambda(a,b) {a/b;};
 };
 println(anon(10,2));
+line();
+
+# vectors and indexing
+a = [[1,2,3],
+     [4,5,6],
+     [7,8,9]];
+for(i in 0:2){
+	for(j in 0:2){
+		println(a[i][j]);
+	};
+};
+
+line();
+for(row in a){
+	for(elem in row){
+		println(elem);
+	};
+};
 </textarea>
 <br>
 <button onclick="tokenize();">Tokenize</button>

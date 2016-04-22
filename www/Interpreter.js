@@ -48,8 +48,8 @@ class Interpreter {
         }
         if(exp.type == "indexing"){
             if(exp.vector.type == "indexing"){
-                exp.vector = this.evalExpression(exp.vector, scope);
-                return this.evalExpression(exp, scope);
+                var temp = {type:"indexing", vector:this.evalExpression(exp.vector, scope), indices: exp.indices};
+                return this.evalExpression(temp, scope);
             }
             if(exp.vector.type == "vector"){
                 var vec = [];
@@ -124,6 +124,13 @@ class Interpreter {
             var res = null;
             for(var i = 0; i < vec.length; i++){
                 scope.addSymbol(exp.iter.left, vec.value[i]);
+                res = this.evalBlock(exp.body, scope);
+            }
+            return res;
+        }
+        if(exp.type == "while"){
+            var res = null;
+            while(this.evalExpression(exp.pred, scope).value){
                 res = this.evalBlock(exp.body, scope);
             }
             return res;

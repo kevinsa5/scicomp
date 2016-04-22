@@ -160,6 +160,17 @@ class AST {
         };
         return ret;        
     }
+    parseWhile() {
+        this.skipReserved("while");
+        var predicate = this.parseExpression();
+        var body = this.parseExpression();
+        var ret = {
+            type: "while",
+            pred: predicate,
+            body: body,
+        };
+        return ret;
+    }
     parseLambda() {
         return {
             type: "lambda",
@@ -193,6 +204,7 @@ class AST {
             if (ast.isPunctuation("[")) return ast.parseVectorLiteral();
             if (ast.isReserved("if")) return ast.parseIf();
             if (ast.isReserved("for")) return ast.parseFor();
+            if (ast.isReserved("while")) return ast.parseWhile();
             if (ast.isReserved("true") || ast.isReserved("false")) return ast.parseBool();
             if (ast.isReserved("lambda")) {
                 ast.tokenstream.next();
