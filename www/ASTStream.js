@@ -38,17 +38,17 @@ class AST {
 
     isPunctuation(ch) {
         var tok =  this.tokenstream.peek();
-	if(tok == null) return false;
+    if(tok == null) return false;
         return tok.type == "punctuation" && (!ch || tok.value == ch) && tok;
     }
     isReserved(reserved) {
         var tok =  this.tokenstream.peek();
-	if(tok == null) return false;
+    if(tok == null) return false;
         return tok.type == "reserved" && (!reserved || tok.value == reserved) && tok;
     }
     isOperator(operator) {
         var tok =  this.tokenstream.peek();
-	if(tok == null) return false;
+    if(tok == null) return false;
         return tok.type == "operator" && (!operator || tok.value == operator) && tok;
     }
     skipPunctuation(ch) {
@@ -192,7 +192,7 @@ class AST {
         return this.isPunctuation("[") ? this.parseIndexing(expr): expr;
     }
     parseAtom() {
-	var ast = this;
+    var ast = this;
         return this.maybeCall(function(){
             if (ast.isPunctuation("(")) {
                 ast.tokenstream.next();

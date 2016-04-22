@@ -11,7 +11,7 @@ class Interpreter {
                 var exp = this.ast.next();
                 this.evalExpression(exp,this.global);
             } catch(e) {
-		console.log(e);
+        console.log(e);
                 this.rethrowError(e);
             }
         }
@@ -24,10 +24,10 @@ class Interpreter {
         return result;
     }
     evalExpression(exp, scope){
-	if(scope == undefined){
-		console.log("YOU FUCKED UP");
-		alert("ya fucked up brah");
-	}
+        if(scope == undefined){
+            console.log("YOU FUCKED UP");
+            alert("ya fucked up brah");
+        }
         if(exp.type == "assign"){
             if(exp.left.type == "indexing"){
                 var vec = this.evalExpression(exp.left.vector,scope);

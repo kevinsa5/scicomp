@@ -45,7 +45,7 @@ class TokenStream {
                 return new Token("float", parseFloat(s));
             }
         }
-	char = this.charstream.next();
+        char = this.charstream.next();
         if(TokenStream.isPunctuation(char)){
             return new Token("punctuation", char);
         }
@@ -59,10 +59,10 @@ class TokenStream {
         if(TokenStream.isValidSymbolBeginner(char)){
             var s = char + this.readUntil(function(char){return !TokenStream.isValidSymbolCharacter(char);});
             if(TokenStream.isReservedWord(s)){
-		if(s == "true" || s == "false")
-		    return new Token("boolean", s);
-		return new Token("reserved", s);
-	    }
+        if(s == "true" || s == "false")
+            return new Token("boolean", s);
+        return new Token("reserved", s);
+        }
             return new Token("symbol", s);
         }
         this.die("Unknown token: `" + char + "`");
