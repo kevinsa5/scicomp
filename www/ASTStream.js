@@ -219,6 +219,14 @@ class AST {
                 return ast.parseLambda();
             }
             var tok = ast.tokenstream.next();
+            if (tok && tok.value == "-"){
+                return {
+                    type     : "binary",
+                    operator : "-",
+                    left     : new Token("int", 0),
+                    right    : ast.parseAtom()
+                }
+            }
             if (tok && (tok.type == "symbol" || tok.type == "int" || tok.type == "float" || tok.type == "string" || tok.type == "boolean")){
                 return tok;
             } else if(!tok){
