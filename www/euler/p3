@@ -1,0 +1,13 @@
+num = 600851475143;
+while(num % 2 == 0){
+        num = num / 2;
+        println(2);
+};
+div = 3;
+while(num > 1){
+        while(num % div == 0){
+                num = num / div;
+                println(div);
+        };
+        div = div + 2;
+};

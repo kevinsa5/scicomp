@@ -133,6 +133,13 @@ class AST {
         if (name.type != "symbol")  this.tokenstream.die("Expecting symbol name");
         return name.value;
     }
+    parseBreak() {
+        this.skipReserved("break");
+        return {
+            type: "break",
+            value: "null",
+        };
+    }
     parseIf() {
         this.skipReserved("if");
         var cond = this.parseExpression();
@@ -202,6 +209,7 @@ class AST {
             }
             if (ast.isPunctuation("{")) return ast.parseBody();
             if (ast.isPunctuation("[")) return ast.parseVectorLiteral();
+            if (ast.isReserved("break")) return ast.parseBreak();
             if (ast.isReserved("if")) return ast.parseIf();
             if (ast.isReserved("for")) return ast.parseFor();
             if (ast.isReserved("while")) return ast.parseWhile();

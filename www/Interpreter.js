@@ -16,10 +16,16 @@ class Interpreter {
             }
         }
     }
-    evalBlock(block,scope){
+    evalBlock(block,scope, type){
+        if(type == undefined) alert("ya fucked up twice!");
         var result = null;
         for(var i = 0; i < block.length; i++){
-            result = this.evalExpression(block[i], scope);
+            var temp = this.evalExpression(block[i], scope);
+            if(temp && temp.type == "break"){
+                if(type == "if" || type == "for" || type == "while" || type == "funceval")
+                    return temp;
+            }
+            result = temp;
         }
         return result;
     }
@@ -95,7 +101,7 @@ class Interpreter {
             for(var i = 0; i < exp.args.length; i++){
                 newscope.addSymbol({value: func.vars[i]}, this.evalExpression(exp.args[i],scope));
             }
-            return this.evalBlock(func.body, newscope);
+            return this.evalBlock(func.body, newscope, "funceval");
         }
         if(exp.type == "lambda"){
             return exp;
@@ -106,10 +112,10 @@ class Interpreter {
                 this.die("Cannot evaluate as boolean: " + exp.cond);
             }
             if(predicate.value == true){
-                return this.evalBlock(exp.then,scope);
+                return this.evalBlock(exp.then,scope, "if");
             }
             if(exp.hasOwnProperty("else")){
-                return this.evalBlock(exp.else,scope);
+                return this.evalBlock(exp.else,scope, "if");
             }
             return null;
         }
@@ -124,14 +130,20 @@ class Interpreter {
             var res = null;
             for(var i = 0; i < vec.length; i++){
                 scope.addSymbol(exp.iter.left, vec.value[i]);
-                res = this.evalBlock(exp.body, scope);
+                var temp = this.evalBlock(exp.body, scope, "for");
+                if(temp && temp.type == "break") 
+                    break;
+                res = temp;
             }
             return res;
         }
         if(exp.type == "while"){
             var res = null;
             while(this.evalExpression(exp.pred, scope).value){
-                res = this.evalBlock(exp.body, scope);
+                temp = this.evalBlock(exp.body, scope, "while");
+                if(temp && temp.type == "break")
+                    break;
+                res = temp; 
             }
             return res;
         }
@@ -263,7 +275,7 @@ class Interpreter {
         this.die("Unknown expression: " + JSON.stringify(exp));
     }
     isAtom(exp){
-        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector";
+        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector" || exp.type == "break";
     }
     rethrowError(e){
         this.out.println(e);

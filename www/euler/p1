@@ -1,0 +1,11 @@
+sum = 0;
+for(i in 0:3:999){
+    sum = sum + i;
+};
+for(i in 0:5:999){
+    sum = sum + i;
+};
+for(i in 0:15:999){
+    sum = sum - i;
+};
+println(sum);
