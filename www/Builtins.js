@@ -43,5 +43,16 @@ class Builtins {
             this.rawPrint(exp.args[i], false, scope);
         }
     }
+    length(exp, scope){
+        if(exp.args.length > 1){
+            this.parent.die("`length` takes exactly one argument.");
+            return null;
+        }
+        var arg = this.parent.evalExpression(exp.args[0], scope);
+        if(arg.hasOwnProperty("length")){
+            return {type:"int",value: arg.length};
+        }
+        this.parent.die("`length` does not accept arguments of type `" + arg.type + "`.");  
+    }
 }
 

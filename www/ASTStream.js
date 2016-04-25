@@ -227,7 +227,10 @@ class AST {
                     right    : ast.parseAtom()
                 }
             }
-            if (tok && (tok.type == "symbol" || tok.type == "int" || tok.type == "float" || tok.type == "string" || tok.type == "boolean")){
+            if (tok && (tok.type == "symbol" || tok.type == "int" || tok.type == "float" || tok.type == "boolean")){
+                return tok;
+            } else if(tok && tok.type == "string"){
+                tok.length = tok.value.length;
                 return tok;
             } else if(!tok){
                 ast.die("Unexpected end of program");

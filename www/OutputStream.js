@@ -4,6 +4,7 @@ class OutputStream {
     }
     setTarget(output){
         this.output = output;
+        this.clear();
     }
     print(str){
         this.output.text(this.output.text() + str);

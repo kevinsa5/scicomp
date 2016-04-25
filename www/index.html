@@ -1,86 +1,61 @@
 <!DOCTYPE html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <title>Interpreter Testbed</title>
-            <script type = "text/javascript" src = "http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/2.7.0/math.min.js"></script>
-        <script type="text/javascript" src="/global/taboverride.js"></script>
-        <script type="text/javascript" src="CharacterStream.js"></script>
-        <script type="text/javascript" src="TokenStream.js"></script>
-        <script type="text/javascript" src="ASTStream.js"></script>
+        <title>Interpreter Testbed with Web Workers</title>
         <script type="text/javascript" src="OutputStream.js"></script>
-        <script type="text/javascript" src="Scope.js"></script>
-        <script type="text/javascript" src="Builtins.js"></script>
-        <script type="text/javascript" src="Interpreter.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
         <script type="text/javascript">
-window.onload = function(){
-tabOverride.tabSize(4);
-tabOverride.autoIndent(true);
-tabOverride.tabKey(9).untabKey(9, ['shift']);
-var textarea = document.getElementById("code");
-tabOverride.set(textarea);
+var worker;
+var out = new OutputStream();
+window.onload = function(){ out.setTarget($("#output")); };
+
+
+function makeWorker(){
+    out.clear();
+    worker = new Worker("worker.js");
+    worker.addEventListener('message', function(e)
+    {
+       out.print(e.data);
+    }, false);
+    worker.addEventListener('onerror', function(e)
+    {
+        out.print(e.message);
+    }, false);
 }
-        </script>
-        <script type="text/javascript">
+
 function tokenize(){
-var out = new OutputStream();
-out.setTarget($("#output"));
-out.clear();
-var tokenizer = new TokenStream(new CharacterStream(document.getElementById('code').value));
-while(!tokenizer.empty()){
-    try {
-        var tok = tokenizer.next();
-        out.println(tok.type + ":" + tok.value);
-    } catch(e){
-        console.log(e);
-        out.println(e);
-        return;
-    }
+    makeWorker();
+    var info = {command:"tokenize", data:document.getElementById("code").value};
+    worker.postMessage(info);
 }
+
+function AST(){
+    makeWorker();
+    var info = {command:"AST", data:document.getElementById("code").value};
+    worker.postMessage(info);
 }
-        </script>
-        <script type="text/javascript">
-function parse2(){
-var out = new OutputStream();
-out.setTarget($("#output"));
-out.clear();
-var ast = new AST(new TokenStream(new CharacterStream(document.getElementById('code').value)));
-try{
-    var tree = ast.generate();
-    out.print(JSON.stringify(tree, null, '\t'));
-} catch(e){
-    out.print(e);
-}
-}
-function parse(){
-var out = new OutputStream();
-out.setTarget($("#output"));
-out.clear();
-var ast = new AST(new TokenStream(new CharacterStream(document.getElementById('code').value)));
-while(!ast.empty()){
-    try{
-        var exp = ast.next();
-        out.println(JSON.stringify(exp, null, '\t'));
-        out.println("~~~~~~~~~~~~~~~~~");
-    } catch(e){
-        out.println(e);
-    }
-}
-}
+
 function run(){
-var out = new OutputStream();
-out.setTarget($("#output"));
-out.clear();
-var ast = new AST(new TokenStream(new CharacterStream(document.getElementById('code').value)));
-var interp = new Interpreter(ast, out);
-interp.run();
+    makeWorker();
+    var info = {command:"execute", data:document.getElementById("code").value};
+    worker.postMessage(info);
+}
+
+function kill(){
+    if(worker){
+        worker.terminate();
+        out.println("Interpreter thread killed.");
+    } else {
+        out.println("No worker running.");
+    }
 }
 
         </script>
     </head>
 <body>
 <p>Note: this may not work in Firefox &lt;45 and chromium/chrome &lt;49. </p>
-<textarea id="code" cols="80" rows="20" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'    '+v.substring(e);this.selectionStart=this.selectionEnd=s+4;return false;}">
+<textarea id="code" cols="80" rows="30" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'    '+v.substring(e);this.selectionStart=this.selectionEnd=s+4;return false;}">
 line = lambda(){
     for(i in 1:50){print("~");};
     println("");
@@ -160,8 +135,9 @@ for(row in a){
 </textarea>
 <br>
 <button onclick="tokenize();">Tokenize</button>
-<button onclick="parse();">Generate AST</button>
+<button onclick="AST();">Generate AST</button>
 <button onclick="run();">Run Code</button>
+<button onclick="kill();">Kill Thread</button>
 <br>
 <pre id="output" style="border:2px solid #000;max-height:200px;max-width:650px;overflow:auto;display:block;white-space:pre-wrap"></pre>
 </body>

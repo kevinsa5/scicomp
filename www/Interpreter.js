@@ -5,17 +5,21 @@ class Interpreter {
         this.global = new Scope(null);
         this.native = new Builtins(this);
     }
+
     run(){
+        var start = Date.now();
         while(!this.ast.empty()){
             try {
                 var exp = this.ast.next();
                 this.evalExpression(exp,this.global);
             } catch(e) {
-        console.log(e);
+                console.log(e);
                 this.rethrowError(e);
             }
         }
+        this.out.print("Execution finished " + (Date.now() - start) + "ms");
     }
+
     evalBlock(block,scope, type){
         if(type == undefined) alert("ya fucked up twice!");
         var result = null;
@@ -75,6 +79,14 @@ class Interpreter {
                 var expr = {type: "indexing", vector: vec, indices: exp.indices};
                 return this.evalExpression(expr, scope);
             }
+            if(exp.vector.type == "string"){
+                var str = "";
+                for(var i = 0; i < exp.indices.length; i++){
+                    var j = this.evalExpression(exp.indices[i],scope);
+                    str = str + exp.vector.value.charAt(j.value);
+                }
+                return {type:"string", value: str};
+            }
             this.die("Unknown form of indexing: " + exp.vector.type);
         }
         if(exp.type == "symbol"){
@@ -89,6 +101,9 @@ class Interpreter {
             }
             if(exp.func.value == "print"){
                 return this.native.print(exp, scope);
+            }
+            if(exp.func.value == "length"){
+                return this.native.length(exp, scope);
             }
             var func = scope.find(exp.func);
             if(func.type != "lambda"){
@@ -124,12 +139,16 @@ class Interpreter {
                 this.die("Improper iteration syntax");
             }
             var vec = this.evalExpression(exp.iter.right,scope);
-            if(vec.type != "vector"){
+            if(vec.type != "vector" && vec.type != "string"){
                 this.die("Object not iterable: " + exp.iter.right.value);
             }
             var res = null;
             for(var i = 0; i < vec.length; i++){
-                scope.addSymbol(exp.iter.left, vec.value[i]);
+                if(vec.type == "vector"){
+                    scope.addSymbol(exp.iter.left, vec.value[i]);
+                } else if(vec.type == "string"){
+                    scope.addSymbol(exp.iter.left, {type:"string", value:vec.value.charAt(i)});
+                }
                 var temp = this.evalBlock(exp.body, scope, "for");
                 if(temp && temp.type == "break") 
                     break;
