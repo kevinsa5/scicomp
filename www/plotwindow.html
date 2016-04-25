@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>Plot Window</title>
+        <style type="text/css">
+        canvas { 
+            display: block; 
+            padding:10px;
+        }
+        body {
+            background-color: #BBB;
+        }
+        </style>
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script type="text/javascript" src="/global/processing.js"></script>
+        <script type="text/javascript">
+            function getProcessingSketchId () { return 'figure'; }
+        </script>
+        <script type="text/javascript">
+            var figure_update = false;
+            var plotinfo = {};
+            function update(){
+                figure_update = true;
+            }
+            function go(){
+                plotinfo = window.opener.plotinfo;
+                update();
+            }
+            window.onload = go;
+        </script>
+    </head>
+<body>
+    <canvas id="figure" data-processing-sources="PlotArea.pde figure.pde" width="500" height="500">
+        <p>Your browser does not support the canvas tag.</p>
+    </canvas>
+    <noscript>
+        <p>JavaScript is required to view the contents of this page.</p>
+    </noscript>
+</body>

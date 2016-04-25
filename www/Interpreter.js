@@ -21,7 +21,7 @@ class Interpreter {
     }
 
     evalBlock(block,scope, type){
-        if(type == undefined) alert("ya fucked up twice!");
+        if(type == undefined) this.die("ya fucked up twice!");
         var result = null;
         for(var i = 0; i < block.length; i++){
             var temp = this.evalExpression(block[i], scope);
@@ -36,7 +36,7 @@ class Interpreter {
     evalExpression(exp, scope){
         if(scope == undefined){
             console.log("YOU FUCKED UP");
-            alert("ya fucked up brah");
+            this.die("ya fucked up brah");
         }
         if(exp.type == "assign"){
             if(exp.left.type == "indexing"){
@@ -104,6 +104,9 @@ class Interpreter {
             }
             if(exp.func.value == "length"){
                 return this.native.length(exp, scope);
+            }
+            if(exp.func.value == "plot"){
+                return this.native.plot(exp, scope);
             }
             var func = scope.find(exp.func);
             if(func.type != "lambda"){

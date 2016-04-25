@@ -6,7 +6,7 @@ class OutputStream {
         this.bufferTime = 0;
     }
     flush(){
-        postMessage(this.buffer);
+        postMessage({command: "print", string: this.buffer});
         this.bufferTime = Date.now();
         this.buffer = "";
     }
@@ -18,6 +18,9 @@ class OutputStream {
     }
     println(str){
         this.print(str + "\n");
+    }
+    plot(x,y,title){
+        postMessage({command:"plot",info:{x:x,y:y,title:title}});
     }
 }
 

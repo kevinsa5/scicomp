@@ -54,5 +54,23 @@ class Builtins {
         }
         this.parent.die("`length` does not accept arguments of type `" + arg.type + "`.");  
     }
+    plot(exp, scope){
+        if(exp.args.length != 2){
+            this.parent.die("`plot` only takes an x and a y vector for now.");
+        }
+        var x = this.parent.evalExpression(exp.args[0], scope);
+        var y = this.parent.evalExpression(exp.args[1], scope);
+        if(x.type != "vector" || y.type != "vector"){
+            this.parent.die("`plot` must be passed vector arguments");
+        }
+        var x_arr = [];
+        var y_arr = [];
+        console.log(x);
+        for(var i = 0; i < x.length; i++){
+            x_arr.push(x.value[i].value);
+            y_arr.push(y.value[i].value);
+        }
+        this.parent.out.plot(x_arr,y_arr,"test");
+    }
 }
 

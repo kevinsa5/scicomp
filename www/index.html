@@ -4,19 +4,25 @@
         <title>Interpreter Testbed with Web Workers</title>
         <script type="text/javascript" src="OutputStream.js"></script>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-
         <script type="text/javascript">
 var worker;
 var out = new OutputStream();
 window.onload = function(){ out.setTarget($("#output")); };
 
+var plotinfo = {x:[1,2,3,4],y:[1,4,9,16],title:"test title"};
 
 function makeWorker(){
     out.clear();
     worker = new Worker("worker.js");
     worker.addEventListener('message', function(e)
     {
-       out.print(e.data);
+        if(e.data.command == "print"){
+            out.print(e.data.string);
+        } else if(e.data.command == "plot"){
+            plotinfo = e.data.info;
+            console.log(plotinfo);
+            openWindow();
+        }
     }, false);
     worker.addEventListener('onerror', function(e)
     {
@@ -49,6 +55,11 @@ function kill(){
     } else {
         out.println("No worker running.");
     }
+}
+
+function openWindow(){
+    var win = window.open('plotwindow.html','Plot','scrollbars=yes,width=400,height=400');
+//    win.update();
 }
 
         </script>
@@ -138,6 +149,7 @@ for(row in a){
 <button onclick="AST();">Generate AST</button>
 <button onclick="run();">Run Code</button>
 <button onclick="kill();">Kill Thread</button>
+<button onclick="openWindow();">Open</button>
 <br>
 <pre id="output" style="border:2px solid #000;max-height:200px;max-width:650px;overflow:auto;display:block;white-space:pre-wrap"></pre>
 </body>
