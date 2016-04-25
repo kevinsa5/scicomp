@@ -17,7 +17,7 @@ class Interpreter {
                 this.rethrowError(e);
             }
         }
-        this.out.print("Execution finished " + (Date.now() - start) + "ms");
+        this.out.println("Execution finished " + (Date.now() - start) + "ms");
     }
 
     evalBlock(block,scope, type){
@@ -178,66 +178,47 @@ class Interpreter {
                 return this.evalExpression(exp.right,scope);
             }
             if(exp.operator == ":"){
-                var left = "unknown";
-                var right = "unknown";
-                if(exp.right.type == "int" || exp.right.type == "float"){
-                    right = "num";
-                }
-                if(exp.left.type == "int" || exp.left.type == "float"){
-                    left = "num";
-                }
                 if(exp.left.type == "binary" && exp.left.operator == ":"){
-                    left = "colon";
-                }
-                if(left == "unknown"){
-                    this.die("Invalid left argument to colon operator");
-                }
-                if(right == "unknown"){
-                    this.die("Invalid right argument to colon operator");
-                }
-                // has the form left:step:right ?
-                if(left == "colon"){
-                    left = "unknown";
-                    var step = "unknown";
-                    if(exp.left.left.type == "int" || exp.left.left.type == "float"){
-                        left = "num";
-                    }
-                    if(exp.left.right.type == "int" || exp.left.right.type == "float"){
-                        step = "num";
-                    }
-                    if(left == "unknown"){
+                    var start = this.evalExpression(exp.left.left, scope);
+                    if(!this.isNumber(start)){
                         this.die("Invalid left argument to colon operator");
                     }
-                    if(step == "unknown"){
-                        this.die("Invalid step argument to colon operator");
+                    var step = this.evalExpression(exp.left.right, scope);
+                    if(!this.isNumber(step) || step.value == 0){
+                        this.die("Invalid middle argument to colon operator");
                     }
-                    left = this.evalExpression(exp.left.left, scope);
-                    step = this.evalExpression(exp.left.right, scope);
-                    if(step.value == 0){
-                        this.die("Step size must be nonzero");
+                    var end = this.evalExpression(exp.right, scope);
+                    if(!this.isNumber(end)){
+                        this.die("Invalid right argument to colon operator");
                     }
-                    right = this.evalExpression(exp.right, scope);
                     var vec = [];
-                    var iter = left.value;
-                    var type = (left.type == "int" && step.type == "int") ? "int" : "float";
-                    while((step.value > 0 && iter <= right.value) ||
-                          (step.value < 0 && iter >= right.value)){
+                    var iter = start.value;
+                    var type = (start.type == "int" && step.type == "int") ? "int" : "float";
+                    while((step.value > 0 && iter <= end.value) ||
+                          (step.value < 0 && iter >= end.value)){
                         vec.push({type:type, value:iter});
                         iter = iter + step.value;
                     }
                     return {type:"vector", value:vec, length:vec.length};
+                } else {
+                    var left = this.evalExpression(exp.left, scope);
+                    if(!this.isNumber(left)){
+                        this.die("Invalid left argument to colon operator");
+                    }
+                    var right = this.evalExpression(exp.right, scope);
+                    if(!this.isNumber(right)){
+                        this.die("Invalid right argument to colon operator");
+                    }
+                    var vec = [];
+                    var iter = left.value;
+                    var type = left.type;
+
+                    while(iter <= right.value){
+                        vec.push({type:type,value:iter});
+                        iter = iter + 1;
+                    }
+                    return {type:"vector", value:vec, length:vec.length};
                 }
-                //has the form left:right
-                left = this.evalExpression(exp.left, scope);
-                right = this.evalExpression(exp.right, scope);
-                var vec = [];
-                var iter = left.value;
-                var type = left.type;
-                while(iter <= right.value){
-                    vec.push({type:type,value:iter});
-                    iter = iter + 1;
-                }
-                return {type:"vector", value:vec, length:vec.length};
             }
             var a = this.evalExpression(exp.left,scope);
             var b = this.evalExpression(exp.right,scope);
@@ -292,6 +273,9 @@ class Interpreter {
             this.die("Unimplemented operator: " + exp.operator);
         }
         this.die("Unknown expression: " + JSON.stringify(exp));
+    }
+    isNumber(exp){
+        return exp.type == "int" || exp.type == "float";
     }
     isAtom(exp){
         return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector" || exp.type == "break";
