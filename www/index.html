@@ -20,7 +20,6 @@ function makeWorker(){
             out.print(e.data.string);
         } else if(e.data.command == "plot"){
             plotinfo = e.data.info;
-            console.log(plotinfo);
             openWindow();
         }
     }, false);
@@ -65,91 +64,31 @@ function openWindow(){
         </script>
     </head>
 <body>
-<p>Note: this may not work in Firefox &lt;45 and chromium/chrome &lt;49. </p>
+<p>Note: this may not work in Firefox &lt;45 and chromium/chrome &lt;49, also maybe not on mobile. It uses relatively new JS features.</p>
+<p>See some <a href="example">example syntax</a>, or some project euler <a href="euler">solutions</a>.</p>
 <textarea id="code" cols="80" rows="30" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'    '+v.substring(e);this.selectionStart=this.selectionEnd=s+4;return false;}">
-line = lambda(){
-    for(i in 1:50){print("~");};
-    println("");
-};
-
-# function definition, if/else
-myfunc = lambda(a, b){
-    if(a &lt;= b){
-        println(a);
-    };
-    b = 6;
-    if(b &gt; 5){println("more");} else {println("less");};
-};
-
-myfunc(1,2);
-line();
-
-# these two lines are different!
-println(2*3+4);
-println(2*(3+4));
-line();
-
-# recursion, value of last evaluated expression is implicit return value
-fib = lambda(n) {
-    if(n &lt; 2){
-        result = 1;
+abs = lambda(x){
+    if(x > 0){
+        x;
     } else {
-        result = fib(n-1) + fib(n-2);
+        -x;
     };
 };
 
-# for loop, colon notation
-for(i in 5:2:15){
-    print("the ", i, "th fibonacci number is ", fib(i));
-    println("");
-};
-line();
-
-# while loop (Collatz Conjecture)
-n = 6;
-while(n != 1){
-    println(n);
-    if(n % 2 == 0){
-        n = n/2;
-    } else {
-        n = 3*n+1;
-    };
-};
-line();
-
-# scoping
-thisvar = 0;
-if(thisvar &gt; 5){
-    anon = lambda(a,b) {a*b;};
-} else {
-    anon = lambda(a,b) {a/b;};
-};
-println(anon(10,2));
-line();
-
-# vectors and indexing
-a = [[1,2,3],
-     [4,5,6],
-     [7,8,9]];
-for(i in 0:2){
-    for(j in 0:2){
-        println(a[i][j]);
-    };
+x = -5:0.1:5;
+y = [];
+for(i in 0:(length(x)-1)){
+    y[i] = abs(x[i]);
 };
 
-line();
-for(row in a){
-    for(elem in row){
-        println(elem);
-    };
-};
+plot(x,y);
 </textarea>
 <br>
 <button onclick="tokenize();">Tokenize</button>
 <button onclick="AST();">Generate AST</button>
 <button onclick="run();">Run Code</button>
 <button onclick="kill();">Kill Thread</button>
-<button onclick="openWindow();">Open</button>
+<button onclick="openWindow();">Last Plot</button>
 <br>
 <pre id="output" style="border:2px solid #000;max-height:200px;max-width:650px;overflow:auto;display:block;white-space:pre-wrap"></pre>
 </body>

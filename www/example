@@ -1,0 +1,87 @@
+line = lambda(){
+    for(i in 1:50){print("~");};
+    println("");
+};
+
+# function definition, if/else
+myfunc = lambda(a, b){
+    if(a <= b){
+        println(a);
+    };
+    b = 6;
+    if(b > 5){println("more");} else {println("less");};
+};
+
+myfunc(1,2);
+line();
+
+# these two lines are different!
+println(2*3+4);
+println(2*(3+4));
+line();
+
+# recursion, value of last evaluated expression is implicit return value
+fib = lambda(n) {
+    if(n < 2){
+        result = 1;
+    } else {
+        result = fib(n-1) + fib(n-2);
+    };
+};
+
+# for loop, colon notation
+for(i in 5:2:15){
+    print("the ", i, "th fibonacci number is ", fib(i));
+    println("");
+};
+line();
+
+# while loop (Collatz Conjecture)
+n = 6;
+while(n != 1){
+    println(n);
+    if(n % 2 == 0){
+        n = n/2;
+    } else {
+        n = 3*n+1;
+    };
+};
+line();
+
+# scoping
+thisvar = 0;
+if(thisvar > 5){
+    anon = lambda(a,b) {a*b;};
+} else {
+    anon = lambda(a,b) {a/b;};
+};
+println(anon(10,2));
+line();
+
+# vectors and indexing
+a = [[1,2,3],
+     [4,5,6],
+     [7,8,9]];
+for(i in 0:2){
+    for(j in 0:2){
+        println(a[i][j]);
+    };
+};
+
+line();
+for(row in a){
+    for(elem in row){
+        println(elem);
+    };
+};
+
+line();
+
+# short circuit evaluation
+t = true;
+f = false;
+
+t || println("not printed");
+f || println("printed");
+t && println("also printed");
+f && println("not printed");

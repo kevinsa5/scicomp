@@ -52,6 +52,9 @@ class Builtins {
         if(arg.hasOwnProperty("length")){
             return {type:"int",value: arg.length};
         }
+        if(arg.value.hasOwnProperty("length")){
+            return {type:"int", value: arg.value.length};
+        }
         this.parent.die("`length` does not accept arguments of type `" + arg.type + "`.");  
     }
     plot(exp, scope){
@@ -65,7 +68,6 @@ class Builtins {
         }
         var x_arr = [];
         var y_arr = [];
-        console.log(x);
         for(var i = 0; i < x.length; i++){
             x_arr.push(x.value[i].value);
             y_arr.push(y.value[i].value);

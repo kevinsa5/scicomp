@@ -172,12 +172,12 @@ class Interpreter {
         if(exp.type == "binary"){
             if(exp.operator == "||"){
                 var a = this.evalExpression(exp.left,scope);
-                if(a.value == "true") return a;
+                if(a.value == true) return a;
                 return this.evalExpression(exp.right,scope);
             }
             if(exp.operator == "&&"){
                 var a = this.evalExpression(exp.left,scope);
-                if(a.value == "false") return a;
+                if(a.value == false) return a;
                 return this.evalExpression(exp.right,scope);
             }
             if(exp.operator == ":"){
@@ -251,6 +251,8 @@ class Interpreter {
             if(exp.operator == "+"){
                 if(a.type == "int" && b.type == "int")
                     return {type:"int", value: a.value+b.value};
+                if(a.type == "string" || b.type == "string")
+                    return {type:"string", value: a.value + b.value};
                 return {type:"float", value: a.value+b.value};
             }
             if(exp.operator == "-"){

@@ -1,0 +1,23 @@
+isDivisibleByAll = lambda(n){
+    flag = true;
+    for(i in 2:20){
+        if(n % i != 0){
+            flag = false;
+            break;
+        };
+    };
+    flag;
+};
+
+n = 1;
+
+for(i in 2:20){
+    n = n * i;
+};
+
+for(i in 2:20){
+    while(isDivisibleByAll(n/i)){
+        n = n / i;
+    };
+};
+println(n);

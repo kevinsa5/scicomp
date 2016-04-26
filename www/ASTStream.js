@@ -188,7 +188,7 @@ class AST {
     parseBool() {
         return {
             type  : "bool",
-            value :  this.tokenstream.next().value == "true"
+            value :  this.tokenstream.next().value
         };
     }
     maybeCall(expr) {

@@ -1,0 +1,27 @@
+//dumb solution
+
+isPalindrome = lambda(n){
+    s = n + "";
+    bool = true;
+    for(i in 0:(length(s)-1)){
+        if(s[i] != s[length(s)-1-i]){
+            bool = false;
+            break;
+        };
+    };
+    bool;
+};
+
+max = 0;
+
+for(i in 100:999){
+    for(j in 100:999){
+        p = i*j;
+        if(p > max && isPalindrome(p)){
+            max = p;
+        }
+    };
+};
+
+println(max);
+

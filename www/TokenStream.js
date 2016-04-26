@@ -60,7 +60,7 @@ class TokenStream {
             var s = char + this.readUntil(function(char){return !TokenStream.isValidSymbolCharacter(char);});
             if(TokenStream.isReservedWord(s)){
         if(s == "true" || s == "false")
-            return new Token("boolean", s);
+            return new Token("boolean", s == "true");
         return new Token("reserved", s);
         }
             return new Token("symbol", s);
