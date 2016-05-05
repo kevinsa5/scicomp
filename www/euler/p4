@@ -1,4 +1,4 @@
-//dumb solution
+# dumb solution
 
 isPalindrome = lambda(n){
     s = n + "";

@@ -20,14 +20,15 @@ class Interpreter {
         this.out.println("Execution finished " + (Date.now() - start) + "ms");
     }
 
-    evalBlock(block,scope, type){
-        if(type == undefined) this.die("ya fucked up twice!");
+    evalBlock(block,scope){
         var result = null;
         for(var i = 0; i < block.length; i++){
             var temp = this.evalExpression(block[i], scope);
             if(temp && temp.type == "break"){
-                if(type == "if" || type == "for" || type == "while" || type == "funceval")
-                    return temp;
+                return temp;
+            }
+            if(temp && temp.type == "return"){
+                return temp;
             }
             result = temp;
         }
@@ -92,9 +93,6 @@ class Interpreter {
         if(exp.type == "symbol"){
             return scope.find(exp);
         }
-        if(this.isAtom(exp)){
-            return exp;
-        }
         if(exp.type == "funceval"){
             if(exp.func.value == "println"){
                 return this.native.println(exp,scope);
@@ -119,7 +117,11 @@ class Interpreter {
             for(var i = 0; i < exp.args.length; i++){
                 newscope.addSymbol({value: func.vars[i]}, this.evalExpression(exp.args[i],scope));
             }
-            return this.evalBlock(func.body, newscope, "funceval");
+            var result = this.evalBlock(func.body, newscope);
+            if(result && result.type == "return"){
+                return this.evalExpression(result.value, scope);
+            }
+            return result;
         }
         if(exp.type == "lambda"){
             return exp;
@@ -130,10 +132,10 @@ class Interpreter {
                 this.die("Cannot evaluate as boolean: " + exp.cond);
             }
             if(predicate.value == true){
-                return this.evalBlock(exp.then,scope, "if");
+                return this.evalBlock(exp.then,scope);
             }
             if(exp.hasOwnProperty("else")){
-                return this.evalBlock(exp.else,scope, "if");
+                return this.evalBlock(exp.else,scope);
             }
             return null;
         }
@@ -152,7 +154,7 @@ class Interpreter {
                 } else if(vec.type == "string"){
                     scope.addSymbol(exp.iter.left, {type:"string", value:vec.value.charAt(i)});
                 }
-                var temp = this.evalBlock(exp.body, scope, "for");
+                var temp = this.evalBlock(exp.body, scope);
                 if(temp && temp.type == "break") 
                     break;
                 res = temp;
@@ -162,7 +164,7 @@ class Interpreter {
         if(exp.type == "while"){
             var res = null;
             while(this.evalExpression(exp.pred, scope).value){
-                temp = this.evalBlock(exp.body, scope, "while");
+                temp = this.evalBlock(exp.body, scope);
                 if(temp && temp.type == "break")
                     break;
                 res = temp; 
@@ -170,6 +172,10 @@ class Interpreter {
             return res;
         }
         if(exp.type == "binary"){
+            if(exp.operator == "!"){
+                var a = this.evalExpression(exp.right, scope);
+                return {type:"boolean", value: !a.value};
+            }
             if(exp.operator == "||"){
                 var a = this.evalExpression(exp.left,scope);
                 if(a.value == true) return a;
@@ -277,16 +283,20 @@ class Interpreter {
             }
             this.die("Unimplemented operator: " + exp.operator);
         }
+        if(this.isAtom(exp)){
+            return exp;
+        }
         this.die("Unknown expression: " + JSON.stringify(exp));
     }
     isNumber(exp){
         return exp.type == "int" || exp.type == "float";
     }
     isAtom(exp){
-        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector" || exp.type == "break";
+        return exp.type == "symbol" || exp.type == "int" || exp.type == "float" || exp.type == "string" || exp.type == "boolean" || exp.type == "vector" || exp.type == "break" || exp.type == "return";
     }
     rethrowError(e){
         this.out.println(e);
+        this.die(e);
     }
     die(msg){
         this.out.println("Interpreter Error: " + msg);

@@ -1,0 +1,9 @@
+N = 100;
+sum1 = 0;
+sum2 = 0;
+for(i in 1:N){
+    sum1 = sum1 + i;
+    sum2 = sum2 + i^2;
+};
+sum1 = sum1^2;
+println(sum1 - sum2);

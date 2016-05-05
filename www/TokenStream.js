@@ -94,7 +94,7 @@ class TokenStream {
         return /[a-zA-Z0-9]/i.test(char);
     }
     static isReservedWord(word){
-        return ["if", "then", "else", "for", "while", "true", "false", "lambda", "break"].indexOf(word) != -1;
+        return ["if", "then", "else", "for", "while", "true", "false", "lambda", "break", "return"].indexOf(word) != -1;
     }
     static isSingleCharOperator(char){
         return "!%^*/+-<>=:".indexOf(char) != -1;

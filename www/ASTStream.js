@@ -5,6 +5,7 @@ class AST {
             "=": 1,
             "||": 2,
             "&&": 3,
+            "!" : 4,
             "<": 7, ">": 7, "<=": 7, ">=": 7, "==": 7, "!=": 7,
             "+": 10, "-": 10,
             "*": 20, "/": 20, "%": 20,
@@ -38,17 +39,17 @@ class AST {
 
     isPunctuation(ch) {
         var tok =  this.tokenstream.peek();
-    if(tok == null) return false;
+        if(tok == null) return false;
         return tok.type == "punctuation" && (!ch || tok.value == ch) && tok;
     }
     isReserved(reserved) {
         var tok =  this.tokenstream.peek();
-    if(tok == null) return false;
+        if(tok == null) return false;
         return tok.type == "reserved" && (!reserved || tok.value == reserved) && tok;
     }
     isOperator(operator) {
         var tok =  this.tokenstream.peek();
-    if(tok == null) return false;
+        if(tok == null) return false;
         return tok.type == "operator" && (!operator || tok.value == operator) && tok;
     }
     skipPunctuation(ch) {
@@ -140,6 +141,13 @@ class AST {
             value: "null",
         };
     }
+    parseReturn() {
+        this.skipReserved("return");
+        return {
+            type: "return",
+            value: this.parseAtom(),
+        };
+    }
     parseIf() {
         this.skipReserved("if");
         var cond = this.parseExpression();
@@ -210,6 +218,7 @@ class AST {
             if (ast.isPunctuation("{")) return ast.parseBody();
             if (ast.isPunctuation("[")) return ast.parseVectorLiteral();
             if (ast.isReserved("break")) return ast.parseBreak();
+            if (ast.isReserved("return")) return ast.parseReturn();
             if (ast.isReserved("if")) return ast.parseIf();
             if (ast.isReserved("for")) return ast.parseFor();
             if (ast.isReserved("while")) return ast.parseWhile();
@@ -224,6 +233,14 @@ class AST {
                     type     : "binary",
                     operator : "-",
                     left     : new Token("int", 0),
+                    right    : ast.parseAtom()
+                }
+            }
+            if (tok && tok.value == "!"){
+                return {
+                    type     : "binary",
+                    operator : "!",
+                    left     : null,
                     right    : ast.parseAtom()
                 }
             }

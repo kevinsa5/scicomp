@@ -85,3 +85,34 @@ t || println("not printed");
 f || println("printed");
 t && println("also printed");
 f && println("not printed");
+
+# truth tables:
+println("t || t : " + (t || t));
+println("t || f : " + (t || f));
+println("f || t : " + (f || t));
+println("f || f : " + (f || f));
+
+println(t && t);
+println(t && f);
+println(f && t);
+println(f && f);
+
+println(f || !t);
+println(f || !f);
+println(t && !t);
+println(t && !f);
+
+f = lambda(val){
+    if(val > 0){
+        return "positive";
+    };
+    if(val == 0){
+        return "zero";
+    };
+    return "negative";
+};
+
+println(f(-1));
+println(f(0));
+println(f(1));
+
