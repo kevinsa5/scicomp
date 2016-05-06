@@ -4,7 +4,12 @@ class Builtins {
     }
     rawPrint(exp, ln, scope){
         var result = this.parent.evalExpression(exp, scope);
-        if(result.type == "vector"){
+        if(!result){
+            if(ln)
+                this.parent.out.println("null");
+            else
+                this.parent.out.print("null");
+        } else if(result.type == "vector"){
             this.parent.out.print("[");
             for(var j = 0; j < result.length-1; j++){
                 var elem = this.parent.evalExpression(result.value[j], scope);

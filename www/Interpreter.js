@@ -119,7 +119,7 @@ class Interpreter {
             }
             var result = this.evalBlock(func.body, newscope);
             if(result && result.type == "return"){
-                return this.evalExpression(result.value, scope);
+                return this.evalExpression(result.value, newscope);
             }
             return result;
         }

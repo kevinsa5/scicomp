@@ -23,9 +23,9 @@ line();
 # recursion, value of last evaluated expression is implicit return value
 fib = lambda(n) {
     if(n < 2){
-        result = 1;
+        return 1;
     } else {
-        result = fib(n-1) + fib(n-2);
+        return fib(n-1) + fib(n-2);
     };
 };
 
@@ -48,7 +48,7 @@ while(n != 1){
 };
 line();
 
-# scoping
+# scoping and implicit returns
 thisvar = 0;
 if(thisvar > 5){
     anon = lambda(a,b) {a*b;};
@@ -92,10 +92,10 @@ println("t || f : " + (t || f));
 println("f || t : " + (f || t));
 println("f || f : " + (f || f));
 
-println(t && t);
-println(t && f);
-println(f && t);
-println(f && f);
+println("t && t : " + (t && t));
+println("t && f : " + (t && f));
+println("f && t : " + (f && t));
+println("f && t : " + (f && f));
 
 println(f || !t);
 println(f || !f);

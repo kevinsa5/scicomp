@@ -145,7 +145,7 @@ class AST {
         this.skipReserved("return");
         return {
             type: "return",
-            value: this.parseAtom(),
+            value: this.parseExpression(),
         };
     }
     parseIf() {
