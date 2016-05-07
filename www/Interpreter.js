@@ -94,17 +94,8 @@ class Interpreter {
             return scope.find(exp);
         }
         if(exp.type == "funceval"){
-            if(exp.func.value == "println"){
-                return this.native.println(exp,scope);
-            }
-            if(exp.func.value == "print"){
-                return this.native.print(exp, scope);
-            }
-            if(exp.func.value == "length"){
-                return this.native.length(exp, scope);
-            }
-            if(exp.func.value == "plot"){
-                return this.native.plot(exp, scope);
+            if(typeof this.native[exp.func.value] === "function"){
+                return this.native[exp.func.value](exp, scope);
             }
             var func = scope.find(exp.func);
             if(func.type != "lambda"){
@@ -148,7 +139,7 @@ class Interpreter {
                 this.die("Object not iterable: " + exp.iter.right.value);
             }
             var res = null;
-            for(var i = 0; i < vec.length; i++){
+            for(var i = 0; i < this.native.rawLength(vec).value; i++){
                 if(vec.type == "vector"){
                     scope.addSymbol(exp.iter.left, vec.value[i]);
                 } else if(vec.type == "string"){
@@ -157,6 +148,8 @@ class Interpreter {
                 var temp = this.evalBlock(exp.body, scope);
                 if(temp && temp.type == "break") 
                     break;
+                if(temp && temp.type == "return")
+                    return temp;
                 res = temp;
             }
             return res;
@@ -167,6 +160,8 @@ class Interpreter {
                 temp = this.evalBlock(exp.body, scope);
                 if(temp && temp.type == "break")
                     break;
+                if(temp && temp.type == "return")
+                    return temp;
                 res = temp; 
             }
             return res;

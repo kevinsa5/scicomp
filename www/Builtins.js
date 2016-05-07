@@ -11,7 +11,7 @@ class Builtins {
                 this.parent.out.print("null");
         } else if(result.type == "vector"){
             this.parent.out.print("[");
-            for(var j = 0; j < result.length-1; j++){
+            for(var j = 0; j < this.rawLength(result, scope).value-1; j++){
                 var elem = this.parent.evalExpression(result.value[j], scope);
                 if(elem.type == "vector"){
                     this.rawPrint(elem,false,scope);
@@ -54,9 +54,12 @@ class Builtins {
             return null;
         }
         var arg = this.parent.evalExpression(exp.args[0], scope);
-        if(arg.hasOwnProperty("length")){
+        return this.rawLength(arg, scope);
+    }
+    rawLength(arg, scope){
+        /*if(arg.hasOwnProperty("length")){
             return {type:"int",value: arg.length};
-        }
+        }*/
         if(arg.value.hasOwnProperty("length")){
             return {type:"int", value: arg.value.length};
         }
@@ -78,6 +81,37 @@ class Builtins {
             y_arr.push(y.value[i].value);
         }
         this.parent.out.plot(x_arr,y_arr,"test");
+    }
+    parseInt(exp, scope){
+        if(exp.args.length > 2){
+            this.parent.die("`parseInt` takes no more than two arguments.");
+            return null;
+        }
+        var str = this.parent.evalExpression(exp.args[0], scope);
+        if(str.type != "string"){
+            this.parent.die("`parseInt` must be given a string argument.");
+            return null;
+        }
+        var base = 10;
+        if(exp.args.length == 2){
+            base = this.parent.evalExpression(exp.args[0], scope);
+            if(base.type != "int"){
+                this.parent.die("`parseInt` base must be an int.");
+            }
+        }
+        return {type:"int", value: parseInt(str.value, base.value)};
+    }
+    zeros(exp, scope){
+        if(exp.args.length > 1){
+            this.parent.die("`zeros` can only create 1-D arrays right now.");
+            return null;
+        }
+        var vec = [];
+        var N = parseInt(this.parent.evalExpression(exp.args[0],scope).value);
+        for(var i = 0; i < N; i++){
+            vec[i] = {type:"int", value:0};
+        }
+        return {type:"vector", value:vec, length:N};
     }
 }
 

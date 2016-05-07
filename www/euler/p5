@@ -1,16 +1,13 @@
 isDivisibleByAll = lambda(n){
-    flag = true;
     for(i in 2:20){
         if(n % i != 0){
-            flag = false;
-            break;
+            return false;
         };
     };
-    flag;
+    return true;
 };
 
 n = 1;
-
 for(i in 2:20){
     n = n * i;
 };

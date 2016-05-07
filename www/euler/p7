@@ -1,31 +1,22 @@
-# slow
+# a little slow
 
-isPrime = lambda(n){
-    flag = true;
-    if(n > 3){
-        if(n % 2 == 0){
-            flag = false;
-        } else {
-            for(i in 3:2:(n/2)){
-                if(n % i == 0){
-                    flag = false;
-                    break;
-                };
-            };
+primes = [];
+primes[0] = 2;
+n = 1;
+x = 3;
+while(n < 10001){
+    isprime = true;
+    for(p in primes){
+        if(x % p == 0){
+            isprime = false;
+            break;
         };
-    };    
-    flag;
-};
-
-n = 0;
-N = 10001;
-x = 1;
-
-while(n < N){
-    x = x + 1;
-    while(isPrime(x) == false){
-        x = x+1;
     };
-    n = n + 1;
+    if(isprime){
+        primes[n] = x;
+        n = n+1;
+    };
+    x = x + 2;
 };
-println(x);
+
+println(primes[n-1]);

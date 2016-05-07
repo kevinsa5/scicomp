@@ -87,9 +87,11 @@ plot(x,y);
 <br>
 <button onclick="tokenize();">Tokenize</button>
 <button onclick="AST();">Generate AST</button>
-<button onclick="run();">Run Code</button>
+<button onclick="run();">Run <img src="run.png" height=12></button>
 <button onclick="kill();">Kill Thread</button>
 <button onclick="openWindow();">Last Plot</button>
+<button onclick="$('#code').text('')">Clear Editor</button>
+<button onclick="$('#output').text('')">Clear Output</button>
 <br>
 <pre id="output" style="border:2px solid #000;max-height:200px;max-width:650px;overflow:auto;display:block;white-space:pre-wrap"></pre>
 </body>
